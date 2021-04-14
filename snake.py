@@ -19,6 +19,20 @@ def main():
 	CLOCK = pygame.time.Clock()
 	#game loop
 	while 1:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				sys.exit()
+			keys = pygame.key.get_pressed()
+
+			if (keys[pygame.K_w] or keys[pygame.K_UP]) and direction != 'down':
+				direction = 'up'
+			if (keys[pygame.K_s] or keys[pygame.K_DOWN]) and direction != 'up':
+				direction = 'down'
+			if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) and direction != 'left':
+				direction = 'right'
+			if (keys[pygame.K_a] or keys[pygame.K_LEFT]) and direction != 'right':
+				direction = 'left'
 		screen.fill((0,0,0))
 
 		#désiner le cor du serpent
@@ -34,6 +48,9 @@ def main():
 			snake_pos[1] -= 10
 		elif direction == 'down':
 			snake_pos[1] += 10
+
+
+
 		snake_body.pop(0)
 		snake_body.append(list(snake_pos))
 		pygame.display.update()
