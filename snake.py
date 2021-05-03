@@ -30,13 +30,13 @@ def main():
 				sys.exit()
 			keys = pygame.key.get_pressed()
 
-			if (keys[pygame.K_w] or keys[pygame.K_UP]) and direction != 'down':
+			if  keys[pygame.K_UP] and direction != 'down':
 				direction = 'up'
-			if (keys[pygame.K_s] or keys[pygame.K_DOWN]) and direction != 'up':
+			if  keys[pygame.K_DOWN] and direction != 'up':
 				direction = 'down'
-			if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) and direction != 'left':
+			if  keys[pygame.K_RIGHT] and direction != 'left':
 				direction = 'right'
-			if (keys[pygame.K_a] or keys[pygame.K_LEFT]) and direction != 'right':
+			if  keys[pygame.K_LEFT] and direction != 'right':
 				direction = 'left'
 		screen.fill((0,0,0))
 
@@ -56,14 +56,14 @@ def main():
 
 
 		if snake_pos[0] <=0 or snake_pos[0] >= WIN_X:
-			sys.exit()
+			game_over(score)
 		if snake_pos[1] <=0 or snake_pos[1] >= WIN_Y:
-			sys.exit()
+			game_over(score)
 
 		for square in snake_body[1:]:
 			if pygame.Rect(square[0],square[1],10,10).colliderect(pygame.Rect(snake_pos[0],snake_pos[1],10,10)):
 				print("perdu")
-				pygame.display.quit
+				game_over(score)
 				
 
 		if egg_spawn:
@@ -92,4 +92,53 @@ def main():
 		pygame.display.update()
 		CLOCK.tick(25)
 
-main()
+def menu():
+	while 1:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				sys.exit()
+		#detection si le joureur click pour savoir quan démaré le jeux 
+		if event.type == pygame.MOUSEBUTTONDOWN:
+			main()
+		#création de l'interface 
+		screen.fill((0,0,0))
+		# création du text
+		font = pygame.font.SysFont('comicsans',40)
+		message = font.render('click n\'import ou pour commancer' , True , (255,255,255)) 
+		#emplacement sur l'écran
+		message_pos = message.get_rect(center=(WIN_X//2, WIN_Y//2))
+		#aparition du message 
+		screen.blit(message, message_pos)
+		#update de l'écran
+		pygame.display.update()
+
+
+
+
+def game_over(score):
+	while 1:
+		for event in pygame.event.get():
+			if event.type == pygameQUIT:
+				pygame.quit()
+				sys.exit()
+		#couleur du background
+		screen.fill((0,0,0))
+		#detection si le joureur click pour savoir quan démaré le jeux 
+		
+		# le message de mort
+		font = pygame.font.SysFont('comicsans',40)
+		perdu_message = font.render('Ta Perdu click pour rejouer', True , (255,0,0))
+		
+		perdu_score = font.render(f'ton score est de {score}' , True , (255,255,255))
+		
+		perdu_message_pos = perdu_message.get_rect(center=(WIN_X//2, WIN_Y//2))
+      	perdu_score_pos = perdu_score.get_rect(center=(WIN_X//2, WIN_Y//2+40))
+		WIN.blit(game_over_message , font_pos_message)
+		WIN.blit(game_over_score , font_pos_score)
+		pygame.display.update()
+		time.sleep(3)
+
+
+
+menu()
