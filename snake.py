@@ -2,13 +2,36 @@ import pygame
 import sys
 import random
 import color
+import os
 
 pygame.init()
-WIN_X = 800
-WIN_Y = 600
-screen = pygame.display.set_mode((WIN_X,WIN_Y))
+screen_X = 900
+screen_Y = 600
+screen = pygame.display.set_mode((screen_X,screen_Y))
 pygame.display.set_caption('SN Snake')
 
+RED = (255, 0, 0)
+BLEU = (255, 0, 0)
+YELLOW = (255, 255, 0)
+CYAN = (0, 255, 255)
+MAGENTA = (255, 0, 255)
+BLACK = (0,0,0)	
+WHITE = (255,255,255)
+GREEN = (0, 255, 0)
+
+Lenght_of_snake =1 
+score_font = pygame.font.SysFont("Comic",35)
+font_style = pygame.font.SysFont("Arial",20)
+
+
+#Definition du message de fin 
+def message(mess,color): 
+	msg = font_style.render(mess,True,color)
+	screen.blit(msg, [screen_X /2, screen_Y/2])
+
+
+		
+#def main 			
 def main():
 
 	CLOCK = pygame.time.Clock()
@@ -17,34 +40,36 @@ def main():
 
 	egg_pos=[0,0]
 	egg_spawn = True
-	#direction du serpent au répart
+	#direction du serpent au départ
 	direction = 'right'
 	#score
 	score=0
 	CLOCK = pygame.time.Clock()
-	#game loop
+
+
 	while 1:
+
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pygame.quit()
 				sys.exit()
 			keys = pygame.key.get_pressed()
-
-			if  keys[pygame.K_UP] and direction != 'down':
+			#touches 
+			if (keys[pygame.K_UP]) and direction != 'down':
 				direction = 'up'
-			if  keys[pygame.K_DOWN] and direction != 'up':
+			if (keys[pygame.K_DOWN]) and direction != 'up':
 				direction = 'down'
-			if  keys[pygame.K_RIGHT] and direction != 'left':
+			if (keys[pygame.K_RIGHT]) and direction != 'left':
 				direction = 'right'
-			if  keys[pygame.K_LEFT] and direction != 'right':
+			if (keys[pygame.K_LEFT]) and direction != 'right':
 				direction = 'left'
-		screen.fill((0,0,0))
+		screen.fill((238,160,14))
 
-		#désiner le cor du serpent
+		#déssiner le serpent
 		for square in snake_body:
-			pygame.draw.rect(screen ,(0, 255, 0), (square[0],square[1],10,10))
+			pygame.draw.rect(screen ,(60, 128, 43), (square[0],square[1],10,10))
 
-		# mouvement
+		# mouvement + vittesse 
 		if direction == 'right':
 			snake_pos[0] += 10
 		elif direction == 'left':
@@ -54,91 +79,1288 @@ def main():
 		elif direction == 'down':
 			snake_pos[1] += 10
 
-
-		if snake_pos[0] <=0 or snake_pos[0] >= WIN_X:
-			game_over(score)
-		if snake_pos[1] <=0 or snake_pos[1] >= WIN_Y:
-			game_over(score)
-
+		#Colision serpent/bordure
+		if snake_pos[0] <=0 or snake_pos[0] >= screen_X:
+			screen.fill("RED")
+			message("Perdu appuyer sur R jouer et Q pour quiter", BLACK) 
+			
+			pygame.display.update()
+			if (keys[pygame.K_r]):
+				main()
+			if (keys[pygame.K_q]):
+				pygame.quit()
+				sys.exit()
+			
+		if snake_pos[1] <=0 or snake_pos[1] >= screen_Y:
+			screen.fill("RED")
+			message("Perdu appuyer sur R jouer et Q pour quiter", BLACK) 
+			if (keys[pygame.K_r]):
+				main()
+			if (keys[pygame.K_q]):
+				pygame.quit()
+				sys.exit()
+			pygame.display.update()
+		
+		#Colision serpent/serpent
 		for square in snake_body[1:]:
 			if pygame.Rect(square[0],square[1],10,10).colliderect(pygame.Rect(snake_pos[0],snake_pos[1],10,10)):
-				print("perdu")
-				game_over(score)
+				screen.fill("RED")
+				message("Perdu appuyer sur R jouer et Q pour quiter", BLACK)
+				if (keys[pygame.K_r]):
+					main()
+				if (keys[pygame.K_q]):
+					pygame.quit()
+					sys.exit()
+				pygame.display.update()
+				
 				
 
-		if egg_spawn:
+		if egg_spawn:	
 			# choisire la posision de l’œuf
-			egg_pos = [random.randrange(40,WIN_X-40), random.randrange(40,WIN_Y-40)]
+			egg_pos = [random.randrange(40,screen_X-40), random.randrange(40,screen_Y-40)]
 			#desactiver le spawn les œuf
 			egg_spawn = False
-			# fair apraraitre l’œuf
-		pygame.draw.rect(screen ,(255,255,0),(egg_pos[0],egg_pos[1],10,10))
-		#detecter si le serpent touche la l'euf
+			# Dessiner l'oeuf
+		pygame.draw.rect(screen ,(255,255,255),(egg_pos[0],egg_pos[1],10,10))
+		#Collision serpent oeuf
 		if pygame.Rect(snake_pos[0],snake_pos[1],10,10).colliderect(pygame.Rect(egg_pos[0],egg_pos[1],10,10)):
 			egg_spawn = True
+			score = 0
 			score += 10
 		else:
-			#agrandire la taille du serpent
+			#Garder la taille du serpent en fonction des oeufs manger
 			snake_body.pop(0)
 
 
 		#aficher le score
 		font = pygame.font.SysFont('comicsans',40)
 		score_font = font.render(f'{score}' , True , (255,255,255))
-		font_pos = score_font.get_rect(center=(WIN_X//2-40 , 30))
+		font_pos = score_font.get_rect(center=(screen_X//2-40 , 30))
 		screen.blit(score_font , font_pos)
 
 		snake_body.append(list(snake_pos))
 		pygame.display.update()
 		CLOCK.tick(25)
+	
 
-def menu():
-	while 1:
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
-				pygame.quit()
-				sys.exit()
-		#detection si le joureur click pour savoir quan démaré le jeux 
-		if event.type == pygame.MOUSEBUTTONDOWN:
-			main()
-		#création de l'interface 
-		screen.fill((0,0,0))
-		# création du text
-		font = pygame.font.SysFont('comicsans',40)
-		message = font.render('click n\'import ou pour commancer' , True , (255,255,255)) 
-		#emplacement sur l'écran
-		message_pos = message.get_rect(center=(WIN_X//2, WIN_Y//2))
-		#aparition du message 
-		screen.blit(message, message_pos)
-		#update de l'écran
-		pygame.display.update()
+
+
+main()
 
 
 
 
-def game_over(score):
-	while 1:
-		for event in pygame.event.get():
-			if event.type == pygameQUIT:
-				pygame.quit()
-				sys.exit()
-		#couleur du background
-		screen.fill((0,0,0))
-		#detection si le joureur click pour savoir quan démaré le jeux 
-		
-		# le message de mort
-		font = pygame.font.SysFont('comicsans',40)
-		perdu_message = font.render('Ta Perdu click pour rejouer', True , (255,0,0))
-		
-		perdu_score = font.render(f'ton score est de {score}' , True , (255,255,255))
-		
-		perdu_message_pos = perdu_message.get_rect(center=(WIN_X//2, WIN_Y//2))
-      	perdu_score_pos = perdu_score.get_rect(center=(WIN_X//2, WIN_Y//2+40))
-		WIN.blit(game_over_message , font_pos_message)
-		WIN.blit(game_over_score , font_pos_score)
-		pygame.display.update()
-		time.sleep(3)
 
 
 
-menu()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
